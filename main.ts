@@ -1,8 +1,7 @@
 import { runBars } from './vendor/makefun-bars.ts';
 
-// A deterministic, long-only paper bot. It opens one bounded core position on the
-// first cbBTC bar, then holds through short-term noise. A hard loss limit and a
-// wide trailing guard protect capital; the replay itself handles final flattening.
+// A deterministic, long-only paper bot for one-minute cbBTC bars.
+// The replay supplies completed bars; every order fills on a later bar.
 const SYMBOL = 'CBBTC';
 const MAX_ALLOCATION_BPS = 9_500;
 const HARD_STOP_BPS = 2_000;
@@ -32,7 +31,7 @@ await runBars({
       return [];
     }
 
-    // A single entry avoids churn and ensures the bot records a qualifying trade.
+    // One capped entry limits fees while preserving a qualifying filled trade.
     if (entered || stopped) return [];
     const { caps, fees } = state.hello;
     const weight = Math.min(MAX_ALLOCATION_BPS, caps.max_weight_bps);
